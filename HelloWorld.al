@@ -96,6 +96,9 @@ codeunit 50100 DoPost
 {
     TableNo = Integer;
 
+    var
+        SomeGlobalVariable: Text;
+
     trigger OnRun()
     begin
         if Rec.Number mod 2 <> 0 then
@@ -108,5 +111,25 @@ codeunit 50100 DoPost
             Error(ErrorInfo.Create('Number should not be divisible by 10', true, Rec, Rec.FieldNo(Number)));
 
         // Everything was valid, do the actual posting.
+    end;
+
+    procedure GetTheGlobalVariable(): Text
+    begin
+        exit(SomeGlobalVariable);
+    end;
+
+    [IntegrationEvent(true, false)]
+    procedure PublishedEvent(param1: Text; param2: Integer)
+    begin
+    end;
+}
+
+codeunit 50101 SubCodeUnit
+{
+
+    [EventSubscriber(ObjectType::Codeunit, Codeunit::DoPost, 'PublishedEvent', '', true, true)]
+    procedure OnPublishedEvent(param1: Text; param2: Integer; sender: Codeunit DoPost)
+    begin
+        sender.GetTheGlobalVariable();
     end;
 }
